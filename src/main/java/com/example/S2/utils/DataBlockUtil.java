@@ -5,46 +5,52 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class DataBlockUtil {
 
-    public static void splitAndCompressCsv(String inputCsvPath, int rowsPerFile, String outputDirPath) throws IOException {
-        Path outputPath = Paths.get(outputDirPath);
-        if (!Files.exists(outputPath)) {
-            Files.createDirectories(outputPath);
-        }
+    public static String findAndRemoveBlockWithSignatureSequential(String csvPath, int rowsPerBlock, String signatureToFind) throws IOException {
+        long startTime = System.currentTimeMillis();
+        Path path = Paths.get(csvPath);
+        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+            String line;
+            int lineCount = 0;
+            List<String> currentBlock = new ArrayList<>();
 
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(inputCsvPath), StandardCharsets.UTF_8)) {
-            String line = reader.readLine(); // 读取表头
-            String[] headers = line != null ? line.split(",") : new String[0];
-            int fileCount = 0;
-            int rowCount = 0;
+            // 跳过表头
+            reader.readLine();
 
-            while (line != null) {
-                String outputFile = outputDirPath + File.separator + "output_" + fileCount + ".csv";
-                try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputFile))) {
-                    writer.write(String.join(",", headers));
-                    writer.newLine();
+            while ((line = reader.readLine()) != null) {
+                currentBlock.add(line);
+                lineCount++;
 
-                    while (rowCount < rowsPerFile && line != null) {
-                        writer.write(line);
-                        writer.newLine();
-                        line = reader.readLine();
-                        rowCount++;
+                // 检查是否达到了数据块的结束，或者是否是文件的最后一行
+                if (lineCount % (rowsPerBlock + 1) == 0 || !reader.ready()) {
+                    // 搜索当前数据块中的MD5值
+                    Optional<String> foundLine = currentBlock.stream()
+                            .filter(l -> l.contains(signatureToFind))
+                            .findFirst();
+
+                    if (foundLine.isPresent()) {
+                        // 从数据块中移除包含MD5的行
+                        currentBlock.remove(foundLine.get());
+                        String remainingBlock = String.join("\n", currentBlock);
+                        long endTime = System.currentTimeMillis(); // 结束时间
+                        System.out.println("Time taken: " + (endTime - startTime) + " ms"); // 打印所花时间
+                        return MD5Util.calculateMD5(remainingBlock);
+                    } else {
+                        // 没有发现MD5，重置当前数据块以读取下一个数据块
+                        currentBlock.clear();
+                        lineCount = 0;
                     }
                 }
-
-                //compressFile(outputFile);
-                String md5 = MD5Util.calculateMD5(outputFile);
-                MD5Util.saveMd5AndUuid(md5);
-                rowCount = 0;
-                fileCount++;
             }
-            PropertiesUtil.readProperties("/Users/zhanghaoran/Desktop/FYP/data/data5/1/testing/uuid_md5/uuid_md5.properties");
-            System.out.println("_______________________________________________________________________________________________");
-            System.out.println("Split and Compression is done");
+            System.out.println("MD5 " + signatureToFind + " not found in any block.");
+            return  "hehe";
         }
     }
 
