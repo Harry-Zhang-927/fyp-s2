@@ -10,6 +10,14 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
 public class MainInterceptor implements HandlerInterceptor {
+    /**
+     * 111
+     * @param request
+     * @param response
+     * @param handler
+     * @return
+     * @throws Exception
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {

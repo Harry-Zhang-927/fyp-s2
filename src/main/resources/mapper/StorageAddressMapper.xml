@@ -1,0 +1,10 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.S2.db.mapper.StorageAddressMapper">
+
+    <!-- 自定义查询例子 -->
+    <select id="findStorageAddressByTag" resultType="com.example.S2.db.model.StorageAddress">
+        SELECT * FROM storage_address WHERE tag = #{tag}
+    </select>
+
+    <!-- 更多的自定义SQL语句可以在这里添加 -->
+</mapper>

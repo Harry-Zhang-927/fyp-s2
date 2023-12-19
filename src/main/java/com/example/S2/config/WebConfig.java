@@ -17,7 +17,5 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(mainInterceptor).addPathPatterns("/requestPK/**");;
-        // You can also specify URL patterns to include or exclude.
-        // Example: registry.addInterceptor(myInterceptor).addPathPatterns("/api/*");
     }
 }

@@ -1,8 +1,6 @@
 package com.example.S2;
 
 import com.example.S2.utils.SecurityUtils;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.security.*;
 
