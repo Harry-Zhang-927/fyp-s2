@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class StorageAddressServiceImpl extends ServiceImpl<StorageAddressMapper,StorageAddress> implements StorageAddressService {
@@ -23,5 +24,9 @@ public class StorageAddressServiceImpl extends ServiceImpl<StorageAddressMapper,
     public String getBlockMD5ByAddress(String tag) throws IOException {
         StorageAddress storageAddress = getStorageAddressesByTag(tag);
         return DataBlockUtil.findAndRemoveBlockWithSignatureSequential(storageAddress.getUrl(), 1000, tag);
+    }
+
+    public void storeSignatures(List<StorageAddress> storageAddresses) {
+        this.saveBatch(storageAddresses);
     }
 }

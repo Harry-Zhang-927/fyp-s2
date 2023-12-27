@@ -54,17 +54,21 @@ public class DataBlockUtil {
         }
     }
 
-    public static void compressFile(String filePath) throws IOException {
-        String zipFile = filePath + ".zip";
-        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
-            zos.putNextEntry(new ZipEntry(new File(filePath).getName()));
+    public static void writeToCSV(List<String> data, String filename) throws IOException {
+        Path path = Paths.get(filename);
 
-            byte[] bytes = Files.readAllBytes(Paths.get(filePath));
-            zos.write(bytes, 0, bytes.length);
-            zos.closeEntry();
+        // 确保父目录存在
+        if (path.getParent() != null && !Files.exists(path.getParent())) {
+            Files.createDirectories(path.getParent());
         }
 
-        Files.delete(Paths.get(filePath)); // 删除原始的分割文件
+        // 使用 try-with-resources 语句来自动关闭 PrintWriter
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path))) {
+            // 遍历数据列表，写入每个字符串
+            for (String str : data) {
+                writer.println(str);
+            }
+        }
     }
 }
 
